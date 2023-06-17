@@ -1,23 +1,24 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { useState, useEffect } from 'react';
-//import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { editNote, fetchNotes } from '../store/slices/NoteSlices';
 import * as Yup from 'yup';
 
 const EditNote = () => {
 
-  const [editingNote, setEditingNote] = useState({})
 
+  const params = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const notes = useSelector((state) => state.note.notes)
-  //const params = useParams();
 
-  const initialValues = {
-    title: editingNote.title,
-    content: editingNote.content,
-  };
+  const allNotes = useSelector((state) => state.note.notes);
+
+  const [initialValues, setInitialValues] = useState({
+    title: '',
+    content: '',
+  });
 
 
   useEffect(() => {
@@ -25,27 +26,32 @@ const EditNote = () => {
   }, [dispatch])
 
   useEffect(() => {
-    const note = notes.find((note) => note.id === Number(params.id));
+    dispatch(fetchNotes())
+  }, [dispatch]);
+
+  useEffect(() => {
+    const note = allNotes.find((note) => note.id === Number(params.id));
     if (note) {
-      setEditingNote(note);
+      setInitialValues({
+        title: note.title,
+        content: note.content,
+      });
     }
-  }, [notes, params.id]);
+  }, [allNotes, params.id]);
 
   const validationSchema = Yup.object({
     title: Yup.string().required('Title is required'),
     content: Yup.string().required('Content is required'),
   });
 
+  const handleSubmit = (values, resetForm) => {
 
-  const handleSubmit = (values, { resetForm }) => {
-    // Send the data to the server (localhost:9000/update_note)
-    console.log('Sending data:', values);
     dispatch(editNote({
       noteId: Number(params.id),
-      newNote: values
-    }));
-
-    // Reset the form after submission
+      updateNote: values,
+    })).then(() => {
+      navigate('/');
+    });
     resetForm();
   };
 
@@ -55,6 +61,7 @@ const EditNote = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
+        enableReinitialize
       >
         <Form>
           <div className="mb-5">

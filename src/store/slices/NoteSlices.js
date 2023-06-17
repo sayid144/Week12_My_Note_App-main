@@ -16,15 +16,14 @@ export const createNote = createAsyncThunk("note/createNote", async (addNewNote)
     const response = await axios.post("http://localhost:9000/create_note", addNewNote);
     return response.data;
 })
-export const deleteNote = createAsyncThunk("note/deleteNote", async (noteId) => {
-    await axios.delete(`http://localhost:9000/delete_note/${noteId}`);
-    return noteId;
+export const deleteNote = createAsyncThunk("note/deleteNote", async (id) => {
+    await axios.delete(`http://localhost:9000/delete_note/${id}`);
+    return id;
 })
-export const editNote = createAsyncThunk("note/editNote", async (noteId, newNote) => {
-    const response = await axios.update(`http://localhost:9000/update_note/${noteId}`, newNote);
+export const editNote = createAsyncThunk("note/editNote", async ({ noteId, updateNote }) => {
+    const response = await axios.put(`http://localhost:9000/update_note/${noteId}`, updateNote);
     return response.data;
-})
-
+});
 
 export const noteSlices = createSlice({
     name: "note",
@@ -46,18 +45,19 @@ export const noteSlices = createSlice({
             state.notes.push(action.payload);
 
         }).addCase(deleteNote.fulfilled, (state, action) => {
-            const noteId = action.payload;
-            state.notes = state.notes.filter((note) => note.id !== noteId)
+            const id = action.payload;
+            state.notes = state.notes.filter((note) => note.id !== id)
 
         }).addCase(editNote.fulfilled, (state, action) => {
-            const { noteId, newNote } = action.payload;
-            const oldNote = state.notes.find((note) => note.id === noteId)
+            const { id, title, content } = action.payload;
+            const existingNote = state.notes.find((note) => Number(note.id) === Number(id));
+            if (existingNote) {
+                existingNote.title = title;
+                existingNote.content = content;
+            }
         })
 
     }
 })
-//export const selectedNotes = (state) => state.note.notes;
-//export const noteStatus = (state) => state.note.status;
-//export const noteError = (state) => state.note.error;
 
 export default noteSlices.reducer;

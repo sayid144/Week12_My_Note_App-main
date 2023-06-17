@@ -4,14 +4,18 @@ import React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { deleteNote } from "../store/slices/NoteSlices";
+import { Link } from "react-router-dom";
 
 
 function Notes() {
 
+
   const dispatch = useDispatch();
   const notes = useSelector((state) => state.note.notes)
-  const handleDelete = (noteId) => {
-    dispatch(deleteNote(noteId))
+
+
+  const handleDelete = (id) => {
+    dispatch(deleteNote(id))
   };
 
   return (
@@ -28,12 +32,21 @@ function Notes() {
 
           <div className="absolute bg-yellow-400 w-12 h-12 rotate-45 -top-6 -left-6" />
           <div className="absolute bottom-0 left-0 right-0 flex justify-center p-4">
-            <button className="mr-2">
-              <FaEdit size={20} onClick={() => props.handleEdit(note.id, note)} />
-            </button>
-            <button>
-              <FaTrash size={20} onClick={() => handleDelete(note.id)} />
-            </button>
+
+            <Link to={`/edit/${note.id}`}>
+              <button className="mr-2">
+                <FaEdit size={20} />
+              </button>
+            </Link>
+
+            <div>
+              <button>
+                <FaTrash size={20} onClick={() => handleDelete(note.id)} />
+              </button>
+
+            </div>
+
+
           </div>
 
         </div>
